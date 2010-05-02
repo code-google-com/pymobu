@@ -1,4 +1,5 @@
 # License from PyEuclid
+# Modified by Scott Englert for PyMoBu
 #
 # Copyright (c) 2006 Alex Holkner
 # Alex.Holkner@mail.google.com
@@ -19,11 +20,12 @@
 '''
 Matrix and vector module for PyMoBu - will work as stand alone library
 Modified code from PyEuclid module - http://code.google.com/p/pyeuclid/
-See license in py file
+See license in source code.
 
 Works with FBMatrix, FBVector3d, and FBVector2d
 
-To use, simply import this module it will implement the extra methods automatically
+To use, import this module and call insertMathClasses function to integrate
+insert these as base classes.
 '''
 import math
 import operator
@@ -37,7 +39,7 @@ class PMBMatrix(object):
     def __copy__(self):
         return self.__class__(self)
 
-    copy = __copy__
+    Copy = __copy__
 
     def __mul__(self, other):
         if isinstance(other, FBMatrix):
@@ -95,58 +97,58 @@ class PMBMatrix(object):
             A = self
             B = other
             V = FBVector3d()
-            V.x = A[0] * B.x + A[1] * B.y + A[2] * B.z
-            V.y = A[4] * B.x + A[5] * B.y + A[6] * B.z
-            V.z = A[8] * B.x + A[9] * B.y + A[10] * B.z
+            V.X = A[0] * B.X + A[1] * B.Y + A[2] * B.Z
+            V.Y = A[4] * B.X + A[5] * B.Y + A[6] * B.Z
+            V.z = A[8] * B.X + A[9] * B.Y + A[10] * B.Z
             return V
 
-    def transform(self, other):
+    def Transform(self, other):
         A = self
         B = other
         P = FBVector3d()
-        P.x = A[0] * B.x + A[1] * B.y + A[2] * B.z + A[3]
-        P.y = A[4] * B.x + A[5] * B.y + A[6] * B.z + A[7]
-        P.z = A[8] * B.x + A[9] * B.y + A[10] * B.z + A[11]
-        w =   A[12] * B.x + A[13] * B.y + A[14] * B.z + A[15]
+        P.X = A[0] * B.X + A[1] * B.Y + A[2] * B.Z + A[3]
+        P.Y = A[4] * B.X + A[5] * B.Y + A[6] * B.Z + A[7]
+        P.Z = A[8] * B.X + A[9] * B.Y + A[10] * B.Z + A[11]
+        w =   A[12] * B.X + A[13] * B.Y + A[14] * B.Z + A[15]
         if w <> 0:
-            P.x /= w
-            P.y /= w
-            P.z /= w
+            P.X /= w
+            P.Y /= w
+            P.Z /= w
         return P
 
-    def scale(self, x, y, z):
-        self *= self.__class__.new_scale(x, y, z)
+    def Scale(self, x, y, z):
+        self *= self.__class__.NewScale(x, y, z)
         return self
 
-    def translate(self, x, y, z):
-        self *= self.__class__.new_translate(x, y, z)
+    def Translate(self, x, y, z):
+        self *= self.__class__.NewTranslate(x, y, z)
         return self 
 
-    def rotatex(self, angle):
-        self *= self.__class__.new_rotatex(angle)
+    def RotateX(self, angle):
+        self *= self.__class__.NewRotateX(angle)
         return self
 
-    def rotatey(self, angle):
-        self *= self.__class__.new_rotatey(angle)
+    def RotateY(self, angle):
+        self *= self.__class__.NewRotateY(angle)
         return self
 
-    def rotatez(self, angle):
-        self *= self.__class__.new_rotatez(angle)
+    def RotateZ(self, angle):
+        self *= self.__class__.NewRotateZ(angle)
         return self
 
-    def rotate_axis(self, angle, axis):
-        self *= self.__class__.new_rotate_axis(angle, axis)
+    def RotateAxis(self, angle, axis):
+        self *= self.__class__.NewRotateAxis(angle, axis)
         return self
 
-    def rotate_euler(self, heading, attitude, bank):
-        self *= self.__class__.new_rotate_euler(heading, attitude, bank)
+    def RotateEuler(self, heading, attitude, bank):
+        self *= self.__class__.NewRotateEuler(heading, attitude, bank)
         return self
 
-    def rotate_triple_axis(self, x, y, z):
-        self *= self.__class__.new_rotate_triple_axis(x, y, z)
+    def RotateTriple_axis(self, x, y, z):
+        self *= self.__class__.NewRotateTripleAxis(x, y, z)
         return self
 
-    def transpose(self):
+    def Transpose(self):
         (self[0], self[4], self[8], self[12],
          self[1], self[5], self[9], self[13],
          self[2], self[6], self[10], self[14],
@@ -156,24 +158,24 @@ class PMBMatrix(object):
          self[8], self[9], self[10], self[11],
          self[12], self[13], self[14], self[15])
 
-    def transposed(self):
-        M = self.copy()
-        M.transpose()
+    def Transposed(self):
+        M = self.Copy()
+        M.Transpose()
         return M
 
     @classmethod
-    def new(cls, *values):
+    def New(cls, *values):
         M = cls()
         M[:] = values
         return M
     
     @classmethod
-    def new_identity(cls):
+    def NewIdentity(cls):
         self = cls()
         return self
 
     @classmethod
-    def new_scale(cls, x, y, z):
+    def NewScale(cls, x, y, z):
         self = cls()
         self[0] = x
         self[5] = y
@@ -181,7 +183,7 @@ class PMBMatrix(object):
         return self
     
     @classmethod
-    def new_translate(cls, x, y, z):
+    def NewTranslate(cls, x, y, z):
         self = cls()
         self[3] = x
         self[7] = y
@@ -189,7 +191,7 @@ class PMBMatrix(object):
         return self
     
     @classmethod
-    def new_rotatex(cls, angle):
+    def NewRotateX(cls, angle):
         self = cls()
         s = math.sin(angle)
         c = math.cos(angle)
@@ -199,7 +201,7 @@ class PMBMatrix(object):
         return self
     
     @classmethod
-    def new_rotatey(cls, angle):
+    def NewRotateY(cls, angle):
         self = cls()
         s = math.sin(angle)
         c = math.cos(angle)
@@ -209,7 +211,7 @@ class PMBMatrix(object):
         return self    
     
     @classmethod
-    def new_rotatez(cls, angle):
+    def NewRotateZ(cls, angle):
         self = cls()
         s = math.sin(angle)
         c = math.cos(angle)
@@ -219,12 +221,12 @@ class PMBMatrix(object):
         return self
     
     @classmethod
-    def new_rotate_axis(cls, angle, axis):
+    def NewRotateAxis(cls, angle, axis):
         assert(isinstance(axis, FBVector3d))
-        vector = axis.normalized()
-        x = vector.x
-        y = vector.y
-        z = vector.z
+        vector = axis.Normalized()
+        x = vector.X
+        y = vector.Y
+        z = vector.Z
 
         self = cls()
         s = math.sin(angle)
@@ -244,7 +246,7 @@ class PMBMatrix(object):
         return self
 
     @classmethod
-    def new_rotate_euler(cls, heading, attitude, bank):
+    def NewRotateEuler(cls, heading, attitude, bank):
         # from http://www.euclideanspace.com/
         ch = math.cos(heading)
         sh = math.sin(heading)
@@ -266,27 +268,27 @@ class PMBMatrix(object):
         return self
     
     @classmethod
-    def new_rotate_triple_axis(cls, x, y, z):
+    def NewRotateTripleAxis(cls, x, y, z):
       m = cls()
       
-      m[0], m[1], m[2] = x.x, y.x, z.x
-      m[4], m[5], m[6] = x.y, y.y, z.y
-      m[8], m[9], m[10] = x.z, y.z, z.z
+      m[0], m[1], m[2] = x.X, y.X, z.X
+      m[4], m[5], m[6] = x.Y, y.Y, z.Y
+      m[8], m[9], m[10] = x.Z, y.Z, z.Z
       
       return m
   
     @classmethod
-    def new_look_at(cls, eye, at, up):
-      z = (eye - at).normalized()
-      x = up.cross(z).normalized()
-      y = z.cross(x)
+    def NewLookAt(cls, eye, at, up):
+      z = (eye - at).Normalized()
+      x = up.Cross(z).Normalized()
+      y = z.Cross(x)
       
-      m = cls.new_rotate_triple_axis(x, y, z)
-      m[3], m[7], m[11] = eye.x, eye.y, eye.z
+      m = cls.NewRotateTripleAxis(x, y, z)
+      m[3], m[7], m[11] = eye.X, eye.Y, eye.Z
       return m
     
     @classmethod
-    def new_perspective(cls, fov_y, aspect, near, far):
+    def NewPerspective(cls, fov_y, aspect, near, far):
         # from the gluPerspective man page
         f = 1 / math.tan(fov_y / 2)
         self = cls()
@@ -299,7 +301,7 @@ class PMBMatrix(object):
         self[15] = 0
         return self
 
-    def determinant(self):
+    def Determinant(self):
         return ((self[0] * self[5] - self[4] * self[1])
               * (self[10] * self[15] - self[14] * self[11])
               - (self[0] * self[9] - self[8] * self[1])
@@ -313,9 +315,9 @@ class PMBMatrix(object):
               + (self[8] * self[13] - self[12] * self[9])
               * (self[2] * self[7] - self[6] * self[3]))
 
-    def inverse(self):
+    def Inverse(self):
         tmp = self.__class__()
-        d = self.determinant();
+        d = self.Determinant();
 
         if abs(d) < 0.001:
             # No inverse, return identity
@@ -351,15 +353,15 @@ class PMBVector2d(object):
     def __copy__(self):
         return self.__class__(self)
     
-    copy = __copy__
+    Copy = __copy__
 
     def __eq__(self, other):
         if isinstance(other, FBVector2d):
-            return self.x == other.x and \
-                   self.y == other.y
+            return self.X == other.X and \
+                   self.Y == other.Y
         elif hasattr(other, '__len__') and len(other) == 2:
-            return self.x == other[0] and \
-                   self.y == other[1]
+            return self.X == other[0] and \
+                   self.Y == other[1]
         else:
             raise Exception("Invalid vector length. Vector '%s' must have 2 items for comparison." % other)
 
@@ -367,110 +369,110 @@ class PMBVector2d(object):
         return not self.__eq__(other)
 
     def __nonzero__(self):
-        return self.x != 0 or self.y != 0
+        return self.X != 0 or self.Y != 0
 
     def __iadd__(self, other):
         if isinstance(other, FBVector2d):
-            self.x += other.x
-            self.y += other.y
+            self.X += other.X
+            self.Y += other.Y
         else:
-            self.x += other[0]
-            self.y += other[1]
+            self.X += other[0]
+            self.Y += other[1]
         return self
     
     def __isub__(self, other):
         if isinstance(other, FBVector2d):
-            self.x -= other.x
-            self.y -= other.y
+            self.X -= other.X
+            self.Y -= other.Y
         else:
-            self.x -= other[0]
-            self.y -= other[1]
+            self.X -= other[0]
+            self.Y -= other[1]
         return self
 
     def __mul__(self, other):
         if isinstance(other, (int, long, float)):
-            return self.__class__(self.x * other, self.y * other)
+            return self.__class__(self.X * other, self.Y * other)
         else:
             raise TypeError("Multiplier must be instance of (int, long, or float). '%s' given." % other.__class__.__name__)
 
     def __imul__(self, other):
         if isinstance(other, (int, long, float)):
-            self.x *= other
-            self.y *= other
+            self.X *= other
+            self.Y *= other
             return self
         else:
             raise TypeError("Multiplier must be instance of (int, long, or float). '%s' given." % other.__class__.__name__)
 
     def __div__(self, other):
         if isinstance(other, (int, long, float)):
-            return self.__class__(operator.div(self.x, other), operator.div(self.y, other))
+            return self.__class__(operator.div(self.X, other), operator.div(self.Y, other))
         else:
             raise TypeError("Divider must be instance of (int, long, or float). '%s' given." % other.__class__.__name__)
 
     def __truediv__(self, other):
         if isinstance(other, (int, long, float)):
-            return self.__class__(operator.truediv(self.x, other), operator.truediv(self.y, other))
+            return self.__class__(operator.truediv(self.X, other), operator.truediv(self.Y, other))
         else:
             raise TypeError("Divider must be instance of (int, long, or float). '%s' given." % other.__class__.__name__)
 
     def __neg__(self):
-        return self.__class__(-self.x, -self.y)
+        return self.__class__(-self.X, -self.Y)
 
     def __abs__(self):
-        return math.sqrt(self.x ** 2 + self.y ** 2)
+        return math.sqrt(self.X ** 2 + self.Y ** 2)
     
-    magnitude = __abs__
+    Magnitude = __abs__
 
-    def magnitude_squared(self):
-        return self.x ** 2 + self.y ** 2
+    def MagnitudeSquared(self):
+        return self.X ** 2 + self.Y ** 2
 
-    def normalize(self):
-        d = self.magnitude()
+    def Normalize(self):
+        d = self.Magnitude()
         if d:
-            self.x /= d
-            self.y /= d
+            self.X /= d
+            self.Y /= d
         return self
 
-    def normalized(self):
-        d = self.magnitude()
+    def Normalized(self):
+        d = self.Magnitude()
         if d:
-            return self.__class__(self.x / d, 
-                           self.y / d)
+            return self.__class__(self.X / d, 
+                           self.Y / d)
         return self.copy()
 
-    def dot(self, other):
+    def Dot(self, other):
         if isinstance(other, FBVector2d):
-            return self.x * other.x + \
-               self.y * other.y
+            return self.X * other.X + \
+               self.Y * other.Y
         else:
             raise TypeError("Object '%s' must be instance of FBVector2d." % other)
 
-    def cross(self):
-        return self.__class__(self.y, -self.x)
+    def Cross(self):
+        return self.__class__(self.Y, -self.X)
 
-    def reflect(self, normal):
+    def Reflect(self, normal):
         # assume normal is normalized
         if isinstance(normal, FBVector2d):
-            d = 2 * (self.x * normal.x + self.y * normal.y)
-            return self.__class__(self.x - d * normal.x,
-                       self.y - d * normal.y)
+            d = 2 * (self.X * normal.X + self.Y * normal.Y)
+            return self.__class__(self.X - d * normal.X,
+                       self.Y - d * normal.Y)
         else:
             raise TypeError("Object '%s' must be instance of FBVector2d." % other)
     
     @property
-    def x(self):
+    def X(self):
         return self[0]
     
-    @x.setter
-    def x(self, value):
+    @X.setter
+    def X(self, value):
         self[0] = value
     
     @property
-    def y(self):
+    def Y(self):
         return self[1]
     
-    @y.setter
-    def y(self, value):
+    @Y.setter
+    def Y(self, value):
         self[1] = value
     
     __pos__ = __copy__
@@ -480,17 +482,17 @@ class PMBVector3d(object):
     def __copy__(self):
         return self.__class__(self)
     
-    copy = __copy__
+    Copy = __copy__
 
     def __eq__(self, other):
         if isinstance(other, FBVector3d):
-            return self.x == other.x and \
-                   self.y == other.y and \
-                   self.z == other.z
+            return self.X == other.X and \
+                   self.Y == other.Y and \
+                   self.Z == other.Z
         elif hasattr(other, '__len__') and len(other) == 3:
-            return self.x == other[0] and \
-                   self.y == other[1] and \
-                   self.z == other[2]
+            return self.X == other[0] and \
+                   self.Y == other[1] and \
+                   self.Z == other[2]
         else:
             raise Exception("Invalid vector length. Vector '%s' must have 3 items for comparison." % other)
 
@@ -498,129 +500,129 @@ class PMBVector3d(object):
         return not self.__eq__(other)
 
     def __nonzero__(self):
-        return self.x != 0 or self.y != 0 or self.z != 0
+        return self.X != 0 or self.Y != 0 or self.Z != 0
 
     def __iadd__(self, other):
         if isinstance(other, FBVector3d):
-            self.x += other.x
-            self.y += other.y
-            self.z += other.z
+            self.X += other.X
+            self.Y += other.Y
+            self.Z += other.Z
         else:
-            self.x += other[0]
-            self.y += other[1]
-            self.z += other[2]
+            self.X += other[0]
+            self.Y += other[1]
+            self.Z += other[2]
         return self
 
     def __isub__(self, other):
         if isinstance(other, FBVector3d):
-            self.x -= other.x
-            self.y -= other.y
-            self.z -= other.z
+            self.X -= other.X
+            self.Y -= other.Y
+            self.Z -= other.Z
         else:
-            self.x -= other[0]
-            self.y -= other[1]
-            self.z -= other[2]
+            self.X -= other[0]
+            self.Y -= other[1]
+            self.Z -= other[2]
         return self
    
     def __mul__(self, other):
         if isinstance(other, FBVector3d):
-            copy = self.copy()
-            return copy.dot(other)
+            copy = self.Copy()
+            return copy.Dot(other)
         elif isinstance(other, (int, long, float)): 
-            return self.__class__(self.x * other,
-                           self.y * other,
-                           self.z * other)
+            return self.__class__(self.X * other,
+                           self.Y * other,
+                           self.Z * other)
         else:
             raise TypeError("Multiplier must be instance of (int, long, or float). '%s' given." % other.__class__.__name__)
 
     def __imul__(self, other):
         if isinstance(other, (int, long, float)):
-            self.x *= other
-            self.y *= other
-            self.z *= other
+            self.X *= other
+            self.Y *= other
+            self.Z *= other
             return self
         else:
             raise TypeError("Multiplier must be instance of (int, long, or float). '%s' given." % other.__class__.__name__)
 
     def __div__(self, other):
         if type(other) in (int, long, float):
-            return self.__class__(operator.div(self.x, other),
-                       operator.div(self.y, other),
-                       operator.div(self.z, other))
+            return self.__class__(operator.div(self.X, other),
+                       operator.div(self.Y, other),
+                       operator.div(self.Z, other))
         else:
             raise TypeError("Divider must be instance of (int, long, or float). '%s' given." % other.__class__.__name__)
 
     def __truediv__(self, other):
         if type(other) in (int, long, float):
-            return self.__class__(operator.truediv(self.x, other),
-                       operator.truediv(self.y, other),
-                       operator.truediv(self.z, other))
+            return self.__class__(operator.truediv(self.X, other),
+                       operator.truediv(self.Y, other),
+                       operator.truediv(self.Z, other))
         else:
             raise TypeError("Divider must be instance of (int, long, or float). '%s' given." % other.__class__.__name__)
 
     def __neg__(self):
-        return self.__class__(-self.x,
-                        -self.y,
-                        -self.z)
+        return self.__class__(-self.X,
+                        -self.Y,
+                        -self.Z)
 
     def __abs__(self):
-        return math.sqrt(self.x ** 2 + \
-                         self.y ** 2 + \
-                         self.z ** 2)
+        return math.sqrt(self.X ** 2 + \
+                         self.Y ** 2 + \
+                         self.Z ** 2)
     
-    magnitude = __abs__
+    Magnitude = __abs__
 
-    def magnitude_squared(self):
-        return self.x ** 2 + \
-               self.y ** 2 + \
-               self.z ** 2
+    def MagnitudeSquared(self):
+        return self.X ** 2 + \
+               self.Y ** 2 + \
+               self.Z ** 2
 
-    def normalize(self):
-        d = self.magnitude()
+    def Normalize(self):
+        d = self.Magnitude()
         if d:
-            self.x /= d
-            self.y /= d
-            self.z /= d
+            self.X /= d
+            self.Y /= d
+            self.Z /= d
         return self
 
-    def normalized(self):
-        d = self.magnitude()
+    def Normalized(self):
+        d = self.Magnitude()
         if d:
-            return self.__class__(self.x / d, 
-                           self.y / d, 
-                           self.z / d)
-        return self.copy()
+            return self.__class__(self.X / d, 
+                           self.Y / d, 
+                           self.Z / d)
+        return self.Copy()
 
-    def dot(self, other):
+    def Dot(self, other):
         if isinstance(other, FBVector3d):
-            return self.x * other.x + \
-               self.y * other.y + \
-               self.z * other.z
+            return self.X * other.X + \
+               self.Y * other.Y + \
+               self.Z * other.Z
         else:
             raise TypeError("Object '%s' must be instance of FBVector3d." % other)
 
-    def cross(self, other):
+    def Cross(self, other):
         if isinstance(other, FBVector3d):
-            return self.__class__(self.y * other.z - self.z * other.y,
-                       -self.x * other.z + self.z * other.x,
-                       self.x * other.y - self.y * other.x)
+            return self.__class__(self.Y * other.Z - self.Z * other.Y,
+                       -self.X * other.Z + self.Z * other.X,
+                       self.X * other.Y - self.Y * other.X)
         else:
             raise TypeError("Object '%s' must be instance of FBVector3d." % other)
         
-    def reflect(self, normal):
+    def Reflect(self, normal):
         # assume normal is normalized
         if isinstance(normal, FBVector3d):
-            d = 2 * (self.x * normal.x + self.y * normal.y + self.z * normal.z)
-            return self.__class__(self.x - d * normal.x,
-                       self.y - d * normal.y,
-                       self.z - d * normal.z)
+            d = 2 * (self.X * normal.X + self.Y * normal.Y + self.Z * normal.Z)
+            return self.__class__(self.X - d * normal.X,
+                       self.Y - d * normal.Y,
+                       self.Z - d * normal.Z)
         else:
             raise TypeError("Object '%s' must be instance of FBVector3d." % normal)
     
-    def angle(self, other):
+    def Angle(self, other):
         '''Returns angle between two Vectors.'''
         if isinstance(normal, FBVector3d):
-            q = self.normalized().dot(other.normalized())
+            q = self.Normalized().Dot(other.Normalized())
             if q < -1.0:
                 return math.pi
             elif q > 1.0:
@@ -631,27 +633,27 @@ class PMBVector3d(object):
             raise TypeError("Object '%s' must be instance of FBVector3d." % other)
     
     @property
-    def x(self):
+    def X(self):
         return self[0]
     
-    @x.setter
-    def x(self, value):
+    @X.setter
+    def X(self, value):
         self[0] = value
     
     @property
-    def y(self):
+    def Y(self):
         return self[1]
     
-    @y.setter
-    def y(self, value):
+    @Y.setter
+    def Y(self, value):
         self[1] = value
     
     @property
-    def z(self):
+    def Z(self):
         return self[2]
     
-    @z.setter
-    def z(self, value):
+    @Z.setter
+    def Z(self, value):
         self[2] = value
     
     __pos__ = __copy__
@@ -662,14 +664,15 @@ class PMBVector3d(object):
 # Set the these classes as the base class of the 
 # MotionBuilder classes so they inherit the methods
 # -----------------------------------------------------
-_baseClasses = list(FBMatrix.__bases__)
-_baseClasses.insert(0, PMBMatrix)
-FBMatrix.__bases__ = tuple(_baseClasses)
-
-_baseClasses = list(FBVector3d.__bases__)
-_baseClasses.insert(0, PMBVector3d)
-FBVector3d.__bases__ = tuple(_baseClasses)
-
-_baseClasses = list(FBVector2d.__bases__)
-_baseClasses.insert(0, PMBVector2d)
-FBVector2d.__bases__ = tuple(_baseClasses)
+def insertMathClasses():
+    _baseClasses = list(FBMatrix.__bases__)
+    _baseClasses.insert(0, PMBMatrix)
+    FBMatrix.__bases__ = tuple(_baseClasses)
+    
+    _baseClasses = list(FBVector3d.__bases__)
+    _baseClasses.insert(0, PMBVector3d)
+    FBVector3d.__bases__ = tuple(_baseClasses)
+    
+    _baseClasses = list(FBVector2d.__bases__)
+    _baseClasses.insert(0, PMBVector2d)
+    FBVector2d.__bases__ = tuple(_baseClasses)
