@@ -666,13 +666,16 @@ class PMBVector3d(object):
 # -----------------------------------------------------
 def insertMathClasses():
     _baseClasses = list(FBMatrix.__bases__)
-    _baseClasses.insert(0, PMBMatrix)
-    FBMatrix.__bases__ = tuple(_baseClasses)
+    if PMBMatrix not in _baseClasses:
+        _baseClasses.insert(0, PMBMatrix)
+        FBMatrix.__bases__ = tuple(_baseClasses)
     
     _baseClasses = list(FBVector3d.__bases__)
-    _baseClasses.insert(0, PMBVector3d)
-    FBVector3d.__bases__ = tuple(_baseClasses)
+    if PMBVector3d not in _baseClasses:
+        _baseClasses.insert(0, PMBVector3d)
+        FBVector3d.__bases__ = tuple(_baseClasses)
     
     _baseClasses = list(FBVector2d.__bases__)
-    _baseClasses.insert(0, PMBVector2d)
-    FBVector2d.__bases__ = tuple(_baseClasses)
+    if PMBVector2d not in _baseClasses:
+        _baseClasses.insert(0, PMBVector2d)
+        FBVector2d.__bases__ = tuple(_baseClasses)

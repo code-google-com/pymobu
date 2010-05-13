@@ -36,7 +36,10 @@ def deselect(pattern=None, **kwargs):
     for item in pattern:
         matched = ls(pattern=item, **kwargs)
         for obj in matched:
-            obj.Selected = False
+            try:
+                obj.component.Selected = False
+            except:
+                obj.Selected = False
 
 def select(pattern=None, add=False, toggle=False, **kwargs):
     '''
@@ -55,10 +58,16 @@ def select(pattern=None, add=False, toggle=False, **kwargs):
     
     if toggle:
         def selectFunc(x):
-            x.Selected = not x.Selected
+            try:
+                x.component.Selected = not x.component.Selected
+            except:
+                x.Selected = not x.Selected
     else:
         def selectFunc(x):
-            x.Selected = True
+            try:
+                x.component.Selected = True
+            except:
+                x.Selected = True
                 
     for item in pattern:
         matched = ls(pattern=item, **kwargs)
@@ -75,14 +84,18 @@ def delete(pattern=None, **kwargs):
     for item in pattern:
         matched = ls(pattern=item, **kwargs)
         for obj in matched:
-            obj.FBDelete()
+            try:
+                obj.component.FBDelete()
+            except:
+                obj.FBDelete()
 
-def ls(pattern=None, type=None, selected=None, includeNamespace=True):
+def ls(pattern=None, type=None, selected=None, visible=None, includeNamespace=True):
     '''
     Similar to Maya's ls command - returns list of objects that match the given parameters
     @param pattern: name of an object with with optional wild cards '*'
     @param type: object to compare if the component is of that type (either string or python class/type)
     @param selected: True/False if the object is selected or not. Default is either
+    @param visible: True/False if the object is visible. Default is either 
     @param includeNamespace: does the search use the complete name (with namespace)  Default True
     '''
     # set up the name testing based on the pattern
@@ -109,6 +122,12 @@ def ls(pattern=None, type=None, selected=None, includeNamespace=True):
     else:
         passesSelectionTest = lambda x: True
     
+    # for getting visibility test
+    if visible is not None:
+        passesVisibilityTest = lambda x: visible == bool(getattr(x, 'Visibility', False))
+    else:
+        passesVisibilityTest = lambda x: True
+    
     # for testing the type of component
     if type:
         # if they gave a string, evaluate it
@@ -128,11 +147,20 @@ def ls(pattern=None, type=None, selected=None, includeNamespace=True):
         # if we did not pass the selection test, continue on
         if not passesSelectionTest(cmpnt):
             continue
+        # check if the object is visible
+        if not passesVisibilityTest(cmpnt):
+            continue
         # do the same for matching type
         if not passesTypeTest(cmpnt):
             continue
         
         if passesNameTest(cmpnt):
-            matchList.append(cmpnt)
+            # try converting it to a pymobu object
+            try:
+                pmbCmpnt = cmpnt.ConvertToPyMoBu()
+            except:
+                pmbCmpnt = cmpnt
+                
+            matchList.append(pmbCmpnt)
                    
     return matchList
