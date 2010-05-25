@@ -20,16 +20,15 @@ Component module
 Contains component classes and related functions
 '''
 import re
-import logging
-import inspect
+#import logging
 from pyfbsdk import *
 
-logger = logging.getLogger(__name__)
+#logger = logging.getLogger(__name__)
 
 def ConvertToPyMoBu(component):
     '''Utility to convert a FB class to a PMB class'''
     if isinstance(component, PMBComponent):
-        logger.info("Component '%s' is already an PyMoBu object. No need to convert..." % component)
+        #logger.info("Component '%s' is already an PyMoBu object. No need to convert..." % component)
         return component
     
     # get the first two inherited classes
@@ -132,6 +131,9 @@ class PMBComponent(object):
             
         properties = []
         for p in self.component.PropertyList:
+            # odd bug that some items are None
+            if p is None:
+                continue
             
             if not passesOptionalTest(p):
                 continue
@@ -295,30 +297,53 @@ class PMBModel(PMBBox):
             raise Exception("Invalid vector type '%s'. Valid types are: %s" % (type, ', '.join(self.kMatrixTypeDict.keys())))
         return matrix
     
-    def GetVector(self, worldSpace=False, type='Translation'):
+    def GetTranslation(self, worldSpace=False):
         '''
-        Get a transformation vector
+        Get translation vector
         @param worldSpace: world space vector (True/False) Default False
-        @param type: vector type (Translation, Rotation, Scaling, Center, All)  
         '''
         vector = FBVector3d()
-        try:
-            self.component.GetVector(vector, self.kMatrixTypeDict[type], worldSpace)
-        except KeyError:
-            raise Exception("Invalid vector type '%s'. Valid types are: %s" % (type, ', '.join(self.kMatrixTypeDict.keys())))
-        
+        self.component.GetVector(vector, self.kMatrixTypeDict['Translation'], worldSpace)
         return vector
     
-    def SetVector(self, vector, worldSpace=False, type='Translation'):
+    def GetRotation(self, worldSpace=False):
         '''
-        Set a transformation vector
+        Get rotation vector
         @param worldSpace: world space vector (True/False) Default False
-        @param type: vector type (Translation, Rotation, Scaling, Center, All)  
         '''
-        try:
-            self.component.SetVector(vector, self.kMatrixTypeDict[type], worldSpace)
-        except KeyError:
-            raise Exception("Invalid vector type '%s'. Valid types are: %s" % (type, ', '.join(self.kMatrixTypeDict.keys())))
+        vector = FBVector3d()
+        self.component.GetVector(vector, self.kMatrixTypeDict['Rotation'], worldSpace)
+        return vector
+    
+    def GetScale(self, worldSpace=False):
+        '''
+        Get scale vector
+        @param worldSpace: world space vector (True/False) Default False
+        '''
+        vector = FBVector3d()
+        self.component.GetVector(vector, self.kMatrixTypeDict['Scaling'], worldSpace)
+        return vector
+    
+    def SetTranslation(self, vector, worldSpace=False):
+        '''
+        Set the translation vector
+        @param worldSpace: world space vector (True/False) Default False
+        '''
+        self.component.SetVector(vector, self.kMatrixTypeDict['Translation'], worldSpace)
+        
+    def SetRotation(self, vector, worldSpace=False):
+        '''
+        Set the rotation vector
+        @param worldSpace: world space vector (True/False) Default False
+        '''
+        self.component.SetVector(vector, self.kMatrixTypeDict['Rotation'], worldSpace)
+        
+    def SetScale(self, vector, worldSpace=False):
+        '''
+        Set the scale vector
+        @param worldSpace: world space vector (True/False) Default False
+        '''
+        self.component.SetVector(vector, self.kMatrixTypeDict['Scaling'], worldSpace)
             
 # import other component modules
 from pymobu.components.constraints import *
