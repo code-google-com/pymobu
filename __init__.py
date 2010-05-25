@@ -40,72 +40,38 @@ __MBVersion__ = FBSystem().Version
 
 insertMathClasses()
 
-################################
-# setup logging                #
-################################
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-if not logger.handlers: 
-    # add a stream handler if there are no current handlers for this logging instance
-    _console = logging.StreamHandler()
-    _console.setLevel(logging.INFO)
-    _formatter = logging.Formatter('%(levelname)-10s %(message)s')
-    _console.setFormatter(_formatter)
-    logger.addHandler(_console)
+#################################
+## setup logging                #
+#################################
+#logger = logging.getLogger(__name__)
+#logger.setLevel(logging.INFO)
+#if not logger.handlers: 
+#    # add a stream handler if there are no current handlers for this logging instance
+#    _console = logging.StreamHandler()
+#    _console.setLevel(logging.INFO)
+#    _formatter = logging.Formatter('%(levelname)-10s %(message)s')
+#    _console.setFormatter(_formatter)
+#    logger.addHandler(_console)
+#
+#def setLoggingLevel(level):
+#    '''
+#    Set the logging level for this module.
+#    Valid levels are: NOTSET, DEBUG, INFO, WARNING, ERROR, and CRITICAL
+#    '''
+#    kLoggingLevels = {'DEBUG': logging.DEBUG,
+#                      'INFO': logging.INFO,
+#                      'WARNING': logging.WARNING,
+#                      'ERROR': logging.ERROR,
+#                      'CRITICAL': logging.CRITICAL,
+#                      'NOTSET' : logging.NOTSET}
+#    try:
+#        level = level.upper()
+#        logger.setLevel(kLoggingLevels[level])
+#        for handler in logger.handlers:
+#            handler.setLevel(kLoggingLevels[level])
+#    except KeyError:
+#        raise Exception("Can not set level. '%s' is invalid level" % level)
 
-def setLoggingLevel(level):
-    '''
-    Set the logging level for this module.
-    Valid levels are: NOTSET, DEBUG, INFO, WARNING, ERROR, and CRITICAL
-    '''
-    kLoggingLevels = {'DEBUG': logging.DEBUG,
-                      'INFO': logging.INFO,
-                      'WARNING': logging.WARNING,
-                      'ERROR': logging.ERROR,
-                      'CRITICAL': logging.CRITICAL,
-                      'NOTSET' : logging.NOTSET}
-    try:
-        level = level.upper()
-        logger.setLevel(kLoggingLevels[level])
-        for handler in logger.handlers:
-            handler.setLevel(kLoggingLevels[level])
-    except KeyError:
-        raise Exception("Can not set level. '%s' is invalid level" % level)
-
 ################################
-# set up decorators            #
+# set up help                  #
 ################################
-def decorated(origFunc, newFunc, decoration=None):
-    """
-    Copies the original function's name/docs/signature to the new function, so that the docstrings
-    contain relevant information again. 
-    Most importantly, it adds the original function signature to the docstring of the decorating function,
-    as well as a comment that the function was decorated. Supports nested decorations.
-    """
-    if not hasattr(origFunc, '_decorated'):
-        # a func that has yet to be treated - add the original argspec to the docstring
-        import inspect
-        newFunc.__doc__ = "Original Arguments: %s\n\n%s" % (
-            inspect.formatargspec(*inspect.getargspec(origFunc)), 
-            inspect.getdoc(origFunc) or "")
-    else:
-        newFunc.__doc__ = origFunc.__doc__ or ""
-    newFunc.__doc__ += "\n(Decorated by %s)" % (decoration or "%s.%s" % (newFunc.__module__, newFunc.__name__))
-    newFunc.__name__ = origFunc.__name__
-    newFunc.__module__ = origFunc.__module__
-    newFunc.__dict__ = origFunc.__dict__    # share attributes
-    newFunc._decorated = True   # stamp the function as decorated
-
-def decorator(func):
-    """
-    Decorator for decorators. Calls the 'decorated' function above for the decorated function, to preserve docstrings.
-    """
-    def decoratorFunc(origFunc, *x):
-        args = (origFunc,) + x
-        if x:
-            origFunc = x[0]
-        newFunc = func(*args)
-        decorated(origFunc, newFunc, "%s.%s" % (func.__module__, func.__name__))
-        return newFunc
-    decorated(func,decoratorFunc, "%s.%s" % (__name__, "decorator"))
-    return decoratorFunc

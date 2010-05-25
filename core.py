@@ -164,3 +164,55 @@ def ls(pattern=None, type=None, selected=None, visible=None, includeNamespace=Tr
             matchList.append(pmbCmpnt)
                    
     return matchList
+
+################################
+# set up decorators            #
+################################
+def decorated(origFunc, newFunc, decoration=None):
+    """
+    Copies the original function's name/docs/signature to the new function, so that the docstrings
+    contain relevant information again. 
+    Most importantly, it adds the original function signature to the docstring of the decorating function,
+    as well as a comment that the function was decorated. Supports nested decorations.
+    """
+    if not hasattr(origFunc, '_decorated'):
+        # a func that has yet to be treated - add the original argspec to the docstring
+        import inspect
+        newFunc.__doc__ = "Original Arguments: %s\n\n%s" % (
+            inspect.formatargspec(*inspect.getargspec(origFunc)), 
+            inspect.getdoc(origFunc) or "")
+    else:
+        newFunc.__doc__ = origFunc.__doc__ or ""
+    newFunc.__doc__ += "\n(Decorated by %s)" % (decoration or "%s.%s" % (newFunc.__module__, newFunc.__name__))
+    newFunc.__name__ = origFunc.__name__
+    newFunc.__module__ = origFunc.__module__
+    newFunc.__dict__ = origFunc.__dict__    # share attributes
+    newFunc._decorated = True   # stamp the function as decorated
+
+def decorator(func):
+    """
+    Decorator for decorators. Calls the 'decorated' function above for the decorated function, to preserve docstrings.
+    """
+    def decoratorFunc(origFunc, *x):
+        args = (origFunc,) + x
+        if x:
+            origFunc = x[0]
+        newFunc = func(*args)
+        decorated(origFunc, newFunc, "%s.%s" % (func.__module__, func.__name__))
+        return newFunc
+    decorated(func,decoratorFunc, "%s.%s" % (__name__, "decorator"))
+    return decoratorFunc
+
+@decorator
+def showsProgress(func):
+    '''Decorator that creates a progress bar when the function is running'''
+    def wrappedFunc(*args, **kwargs):
+        progressBar = FBProgress()
+        progressBar.Caption = str(func.__name__)
+        # setup to use logging messages
+        try:
+            ret = func(*args, **kwargs)
+        finally:
+            progressBar.FBDelete()
+        return ret
+    return wrappedFunc

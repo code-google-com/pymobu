@@ -25,12 +25,12 @@ constraint into one of the specific constraint classes.
 You can also create a specific constraint through either the class's
 'Create' method or through the CreateConstraint function.
 '''
-import logging
+#import logging
 from pyfbsdk import *
 from pymobu.components import PMBBox
 #from pymobu import decorator
 
-logger = logging.getLogger(__name__)
+#logger = logging.getLogger(__name__)
 
 # create a dictionary of constraint name / indices
 kConstraintTypes = dict((FBConstraintManager().TypeGetName(i), i) for i in xrange(FBConstraintManager().TypeGetCount()))
@@ -52,7 +52,7 @@ def GetConstraintsByType(type):
     '''Returns a list of constraints that are of a given type (Aim, Position, ect)'''
     ret = []
     for constraint in FBSystem().Scene.Constraints:
-        if not isinstance(constraint, PMBBaseConstraint):
+        if not isinstance(constraint, PMBConstraint):
             classType = getattr(kConstraintClassDict.get(constraint.Description), 'constraintType')
         else:
             classType = getattr(constraint, 'constraintType')
@@ -93,7 +93,7 @@ def ConvertToPMBConstraint(constraint):
             constClass = kConstraintClassDict[constraint.Description]
             return constClass(constraint)
         except KeyError:
-            logger.warning("Not Implemented: Unable to convert constraint '%s'. No PyMoBu class available" % constraint.LongName)
+            #logger.warning("Not Implemented: Unable to convert constraint '%s'. No PyMoBu class available" % constraint.LongName)
             return constraint
     else:
         raise TypeError("Object is not an instance of FBConstraint. Got '%s' instead." % constraint.__class__.__name__)
@@ -212,16 +212,15 @@ class PMBCharacter(PMBConstraint):
         return cls(FBCharacter(name))
     
     def GetSlots(self, returnNames=False):
-        '''Returns list of character mapping slots'''
-        slots = []
-        for property in self.component.PropertyList:
-            slotName = getattr(property, 'Name', '')
-            if slotName.endswith('Link'):
-                if returnNames:
-                    slots.append(slotName)
-                else:
-                    slots.append(property)
-        return slots
+        '''
+        Returns list of character mapping slots
+        @param returnNames: True/False to return the character slot name, otherwise the property object is returned'''
+        slots = self.ListProperties(pattern='*Link', type='Object')
+        
+        if returnNames:
+            return map(lambda x: x.GetName(), slots)
+        else:
+            return slots
      
     def ExportMapping(self, filePath, stripPrefix=None):
         '''
@@ -237,22 +236,26 @@ class PMBCharacter(PMBConstraint):
         pickle.dump(mapping, dumpFile, 0)
         dumpFile.close()
         
-    def ImportMapping(self, filePath, addPrefix=None):
+    def ImportMapping(self, filePath, addPrefix=None, haltOnError=True):
         '''
         Applies a character template to the character
         @param filePath: mapping file to import
-        @param addPrefix: append a prefix onto the model names  
+        @param addPrefix: append a prefix onto the model names
+        @param haltOnError: True/False if to raise an exception if a slot or model is not found, otherwise continue
         '''
         import cPickle as pickle
         
-        dumpFile = file(filePath)
-        dumpData = pickle.load(dumpFile)
-        dumpFile.close()
+        with file(filePath) as pickleFile:
+            dumpData = pickle.load(pickleFile)
         
         for slot, model in dumpData.iteritems():
             if model and addPrefix:
                 model = addPrefix + model
-            self.SetSlotModel(slot, model)
+            try:
+                self.SetSlotModel(slot, model)
+            except:
+                if haltOnError:
+                    raise
     
     def GetSlotModel(self, slot):
         '''Gets the model that is assigned to the given character slot'''
@@ -268,27 +271,25 @@ class PMBCharacter(PMBConstraint):
     def SetSlotModel(self, slot, model):
         '''
         Adds a model to a slot in the characterization map
-        @param slot: FBPropertyListObject or slot name 
-        @param model: model to add to the slot 
+        @param slot: full name of character slot
+        @param model: model to add to the slot (can be name or model object)
         '''
         if isinstance(model, basestring):
             obj = FBFindModelByName(model)
             if not obj:
-                raise Exception("Object '%s' does not exist in scene. Unable to add it to character slot '%s'" % (model, slot))
+                raise Exception("Object '%s' does not exist. Unable to add it to character map '%s' under slot '%s'" % (model, self, slot))
         else:
-            obj = model
+            obj = getattr(model, 'component', model)
                  
         # get the character slot
-        charSlot = filter(lambda s: isinstance(s, FBPropertyListObject), [slot, self.PropertyList.Find("%sLink" % slot), self.PropertyList.Find(slot)])
-        if charSlot:
-            charSlot = charSlot[0]
-        else:
-            raise Exception("Invalid character mapping slot '%s'" % slot)
+        charSlot = self.ListProperties(pattern=slot)
+        if not charSlot:
+            raise Exception("Invalid character slot '%s'" % slot)
         # remove all current models from the slot
-        charSlot.removeAll()
+        charSlot[0].removeAll()
         
         if obj:
-            charSlot.append(obj)
+            charSlot[0].append(obj)
     
     def GetCharacterMapping(self, returnNames=True, skipEmpty=True, stripPrefix=None):
         '''
@@ -310,7 +311,7 @@ class PMBCharacter(PMBConstraint):
                 model = slot[0]
             
             if returnNames:
-                slot = slot.Name
+                slot = slot.GetName()
                 if model:
                     model = model.LongName
                     if stripPrefix:
@@ -840,14 +841,13 @@ class PMBMultiReferentialConstraint(PMBConstraint):
     GetParentObject = _RefFuncIndexWrapper(_GetMultiRef, 1)
     RemoveParentObject = _RefFuncIndexWrapper(_RemoveMultiRef, 1)
     
-##########
-## TODO ##
-##########
+########## TO DO ######################################################
     def SetActiveReference(self, model):
-        pass
+        raise NotImplementedError('This method is not yet completed')
     
     def GetActiveReference(self):
-        pass
+        raise NotImplementedError('This method is not yet completed')
+#######################################################################
     
     def SetOffsetTranslation(self, model, vector):
         '''Set the offset translation for the given model'''
