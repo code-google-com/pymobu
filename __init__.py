@@ -24,11 +24,19 @@ functions that wrap around existing MotionBuilder objects.
 It is easy to convert your existing object to a PyMoBu one by
 calling the 'ConvertToPyMoBu' method on that object. 
 
+Google code project page:
+http://code.google.com/p/pymobu/
+
 Supported MB versions:
 2010
 '''
-import logging
+import sys
+from cStringIO import StringIO
+
 from pyfbsdk import FBSystem
+from pyfbsdk_additions import CreateUniqueTool
+from pythonidelib import GenDoc
+
 from datatypes import insertMathClasses
 from core import *
 from components import *
@@ -40,38 +48,33 @@ __MBVersion__ = FBSystem().Version
 
 insertMathClasses()
 
-#################################
-## setup logging                #
-#################################
-#logger = logging.getLogger(__name__)
-#logger.setLevel(logging.INFO)
-#if not logger.handlers: 
-#    # add a stream handler if there are no current handlers for this logging instance
-#    _console = logging.StreamHandler()
-#    _console.setLevel(logging.INFO)
-#    _formatter = logging.Formatter('%(levelname)-10s %(message)s')
-#    _console.setFormatter(_formatter)
-#    logger.addHandler(_console)
-#
-#def setLoggingLevel(level):
-#    '''
-#    Set the logging level for this module.
-#    Valid levels are: NOTSET, DEBUG, INFO, WARNING, ERROR, and CRITICAL
-#    '''
-#    kLoggingLevels = {'DEBUG': logging.DEBUG,
-#                      'INFO': logging.INFO,
-#                      'WARNING': logging.WARNING,
-#                      'ERROR': logging.ERROR,
-#                      'CRITICAL': logging.CRITICAL,
-#                      'NOTSET' : logging.NOTSET}
-#    try:
-#        level = level.upper()
-#        logger.setLevel(kLoggingLevels[level])
-#        for handler in logger.handlers:
-#            handler.setLevel(kLoggingLevels[level])
-#    except KeyError:
-#        raise Exception("Can not set level. '%s' is invalid level" % level)
-
 ################################
 # set up help                  #
 ################################
+_stdout = sys.stdout
+def help(topic):
+    '''Creates a window that displays help information'''
+    win = CreateUniqueTool('Help')
+    win.StartSizeX = 400
+    win.StartSizeY = 500
+    
+    helpText = FBMemo()
+    
+    x = FBAddRegionParam(0, FBAttachType.kFBAttachLeft,"")
+    y = FBAddRegionParam(0, FBAttachType.kFBAttachTop,"")
+    w = FBAddRegionParam(0, FBAttachType.kFBAttachRight,"")
+    h = FBAddRegionParam(0, FBAttachType.kFBAttachBottom,"")
+    
+    win.AddRegion("helpText", "helpText", x, y, w, h)
+
+    win.SetControl("helpText", helpText)
+    
+    ShowTool(win)
+    
+    try:
+        sys.stdout = StringIO()
+        GenDoc(topic)
+        helpText.Text = sys.stdout.getvalue()
+    finally:
+        sys.stdout = _stdout
+    

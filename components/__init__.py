@@ -20,15 +20,15 @@ Component module
 Contains component classes and related functions
 '''
 import re
-#import logging
-from pyfbsdk import *
 
-#logger = logging.getLogger(__name__)
+from pyfbsdk import FBComponent
+from pyfbsdk import FBPropertyType
+from pyfbsdk import FBMatrix
+from pyfbsdk import FBVector3d
 
 def ConvertToPyMoBu(component):
     '''Utility to convert a FB class to a PMB class'''
     if isinstance(component, PMBComponent):
-        #logger.info("Component '%s' is already an PyMoBu object. No need to convert..." % component)
         return component
     
     # get the first two inherited classes
@@ -43,7 +43,8 @@ def ConvertToPyMoBu(component):
             continue
         
         return pmbClass.Convert(component)
-
+    
+# add this function to FBComponent
 FBComponent.ConvertToPyMoBu = ConvertToPyMoBu    
 
 # -----------------------------------------------------
@@ -70,7 +71,7 @@ class PMBComponent(object):
                           ColorRGBA = [FBPropertyType.kFBPT_ColorRGBA, 'ColorAndAlpha'],
                           TimeSpan = [FBPropertyType.kFBPT_TimeSpan, 'Time'])
     
-    def __init__(self, component):        
+    def __init__(self, component):
         self.component = component
 
     def __repr__(self):
@@ -201,6 +202,7 @@ class PMBComponent(object):
         @param hierarchy: Apply this action to hierarchy. Default True
         @param toRight: Add namespace to the right of other namespaces. Default False (left)
         '''
+        from pyfbsdk import FBConstraint
         action = FBNamespaceAction.kFBConcatNamespace
         if hierarchy and not isinstance(self.component, FBConstraint):
             self.component.ProcessNamespaceHierarchy(action, namespace, None, toRight)
@@ -212,6 +214,7 @@ class PMBComponent(object):
         Swaps a new namespace with an existing namespace
         @param hierarchy: Apply this action to hierarchy. Default True
         '''
+        from pyfbsdk import FBConstraint
         action = FBNamespaceAction.kFBReplaceNamespace
         if hierarchy and not isinstance(self.component, FBConstraint):
             self.component.ProcessNamespaceHierarchy(action, newNamespace, oldNamespace)
@@ -223,6 +226,7 @@ class PMBComponent(object):
         Removes all the namespaces
         @param hierarchy: Apply this action to hierarchy. Default True 
         '''
+        from pyfbsdk import FBConstraint
         action = FBNamespaceAction.kFBRemoveAllNamespace
         if hierarchy and not isinstance(self.component, FBConstraint):
             self.component.ProcessNamespaceHierarchy(action, '')
