@@ -25,12 +25,11 @@ constraint into one of the specific constraint classes.
 You can also create a specific constraint through either the class's
 'Create' method or through the CreateConstraint function.
 '''
-#import logging
-from pyfbsdk import *
-from pymobu.components import PMBBox
-#from pymobu import decorator
+from pyfbsdk import FBConstraintManager
+from pyfbsdk import FBSystem
+from pyfbsdk import FBConstraint
 
-#logger = logging.getLogger(__name__)
+from pymobu.components import PMBBox
 
 # create a dictionary of constraint name / indices
 kConstraintTypes = dict((FBConstraintManager().TypeGetName(i), i) for i in xrange(FBConstraintManager().TypeGetCount()))
@@ -209,6 +208,7 @@ class PMBCharacter(PMBConstraint):
         
     @classmethod
     def Create(cls, name):
+        from pyfbsdk import FBCharacter
         return cls(FBCharacter(name))
     
     def GetSlots(self, returnNames=False):
@@ -274,6 +274,7 @@ class PMBCharacter(PMBConstraint):
         @param slot: full name of character slot
         @param model: model to add to the slot (can be name or model object)
         '''
+        from pyfbsdk import FBFindModelByName
         if isinstance(model, basestring):
             obj = FBFindModelByName(model)
             if not obj:
@@ -707,6 +708,7 @@ class PMBPathConstraint(PMBConstraint):
     # Source reference
     def SetPathSource(self, model):
         '''Set the target object'''
+        from pyfbsdk import FBModelPath3D
         if not isinstance(model, FBModelPath3D):
             raise Exception("Object must be of type FBModelPath3D. Got '%s' instead" % model.__class__.__name__)
         self.RemovePathSource()
