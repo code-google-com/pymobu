@@ -34,7 +34,6 @@ import sys
 from cStringIO import StringIO
 
 from pyfbsdk import FBSystem
-from pyfbsdk_additions import CreateUniqueTool
 from pythonidelib import GenDoc
 
 from datatypes import insertMathClasses
@@ -54,6 +53,9 @@ insertMathClasses()
 _stdout = sys.stdout
 def help(topic):
     '''Creates a window that displays help information'''
+    from pyfbsdk import FBAddRegionParam, FBAttachType, FBMemo, ShowTool
+    from pyfbsdk_additions import CreateUniqueTool
+    
     win = CreateUniqueTool('Help')
     win.StartSizeX = 400
     win.StartSizeY = 500
