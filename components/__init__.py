@@ -25,6 +25,7 @@ from pyfbsdk import FBComponent
 from pyfbsdk import FBPropertyType
 from pyfbsdk import FBMatrix
 from pyfbsdk import FBVector3d
+from pyfbsdk import FBModelTransformationMatrix
 
 def ConvertToPyMoBu(component):
     '''Utility to convert a FB class to a PMB class'''
