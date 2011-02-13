@@ -130,17 +130,18 @@ def _AffectZProperty(self):
 def _AffectZProperty(self, state):
     self.component.PropertyList.Find("AffectZ").Data = state
 
-def _RefFuncIndexWrapper(func, idx):
+def _RefFuncIndexWrapper(func, idx, funcName=None, funcDoc=None):
     '''Wraps another function that uses reference indices and returns that function'''
     def _wrappedFunc(self, *args, **kwargs):
         return func(self, idx=idx, *args, **kwargs)
+    
+    _wrappedFunc.__name__ = funcName or func.__name__ 
+    _wrappedFunc.__doc__ = funcDoc or func.__doc__
     return _wrappedFunc
 
 def _GetSingleRef(self, idx):
     '''Returns a single object in the constraint'''
-    def _wrappedFunc(self):
-        return self.component.ReferenceGet(idx)
-    return _wrappedFunc
+    return self.component.ReferenceGet(idx)
     
 def _SetSingleRef(self, model, idx):
     '''Sets the constrained object, either by name or model object'''
@@ -194,14 +195,14 @@ class PMBConstraint(PMBBox):
 class ConstrainedSourceMixIn(object):
     '''Mix-in class for the constrained / multiple source constraint types'''
     # Constrained reference
-    SetConstrainedObject = _RefFuncIndexWrapper(_SetSingleRef, 0)
-    GetConstrainedObject = _RefFuncIndexWrapper(_GetSingleRef, 0)
-    RemoveConstrainedObject = _RefFuncIndexWrapper(_RemoveSingleRef, 0)
+    SetConstrainedObject = _RefFuncIndexWrapper(_SetSingleRef, 0, 'SetConstrainedObject')
+    GetConstrainedObject = _RefFuncIndexWrapper(_GetSingleRef, 0, 'GetConstrainedObject')
+    RemoveConstrainedObject = _RefFuncIndexWrapper(_RemoveSingleRef, 0, 'RemoveConstrainedObject')
     
     # Source reference
-    GetSourceObject = _RefFuncIndexWrapper(_GetMultiRef, 1)
-    AddSourceObject= _RefFuncIndexWrapper(_AddMultiRef, 1)
-    RemoveSourceObject = _RefFuncIndexWrapper(_RemoveMultiRef, 1)
+    GetSourceObject = _RefFuncIndexWrapper(_GetMultiRef, 1, 'GetSourceObject', 'Get a list of source objects')
+    AddSourceObject= _RefFuncIndexWrapper(_AddMultiRef, 1, 'AddSourceObject', 'Add source object(s)')
+    RemoveSourceObject = _RefFuncIndexWrapper(_RemoveMultiRef, 1, 'RemoveSourceObject', 'Remove source object(s)')
     
 class PMBCharacter(PMBConstraint):
     '''PyMoBu Character Class'''
@@ -328,19 +329,19 @@ class PMBAimConstraint(PMBConstraint):
     kWorldUpType = {"Scene Up" : 0, "Object Up" : 1, "Object Rotation Up" : 2, "Vector" : 3, "None" : 4}
     
     # Constrained reference
-    SetConstrainedObject = _RefFuncIndexWrapper(_SetSingleRef, 0)
-    GetConstrainedObject = _RefFuncIndexWrapper(_GetSingleRef, 0)
-    RemoveConstrainedObject = _RefFuncIndexWrapper(_RemoveSingleRef, 0)
+    SetConstrainedObject = _RefFuncIndexWrapper(_SetSingleRef, 0, 'SetConstrainedObject')
+    GetConstrainedObject = _RefFuncIndexWrapper(_GetSingleRef, 0, 'GetConstrainedObject')
+    RemoveConstrainedObject = _RefFuncIndexWrapper(_RemoveSingleRef, 0, 'RemoveConstrainedObject')
     
     # Aim at reference
-    AddAimAtObject = _RefFuncIndexWrapper(_AddMultiRef, 1)
-    GetAimAtObject = _RefFuncIndexWrapper(_GetMultiRef, 1)
-    RemoveAimAtObject = _RefFuncIndexWrapper(_RemoveMultiRef, 1)
+    AddAimAtObject = _RefFuncIndexWrapper(_AddMultiRef, 1, 'AddAimAtObject', 'Add aim at object(s)')
+    GetAimAtObject = _RefFuncIndexWrapper(_GetMultiRef, 1, 'GetAimAtObject', 'Get a list of aim at objects')
+    RemoveAimAtObject = _RefFuncIndexWrapper(_RemoveMultiRef, 1, 'RemoveAimAtObject', 'Remove aim at object(s)')
     
     # World up reference
-    SetWorldUpObject = _RefFuncIndexWrapper(_SetSingleRef, 2)
-    GetWorldUpObject = _RefFuncIndexWrapper(_GetSingleRef, 2)
-    RemoveWorldUpObject = _RefFuncIndexWrapper(_RemoveSingleRef, 2)
+    SetWorldUpObject = _RefFuncIndexWrapper(_SetSingleRef, 2, 'SetWorldUpObject', 'Set the world up object')
+    GetWorldUpObject = _RefFuncIndexWrapper(_GetSingleRef, 2, 'GetWorldUpObjet', 'Get the world up object')
+    RemoveWorldUpObject = _RefFuncIndexWrapper(_RemoveSingleRef, 2, 'RemoveWorldUpObject', 'Remove the world up object')
                    
     def SetWorldUpType(self, type):
         '''Sets the world up type'''
@@ -528,26 +529,26 @@ class PMBScaleConstraint(ConstrainedSourceMixIn, PMBConstraint):
 class PMBThreePointsConstraint(PMBConstraint):
     '''3 Points constraint class'''
     constraintType = '3 Points'
-    
+       
     # Constrained reference
-    SetConstrainedObject = _RefFuncIndexWrapper(_SetSingleRef, 0)
-    GetConstrainedObject = _RefFuncIndexWrapper(_GetSingleRef, 0)
-    RemoveConstrainedObject = _RefFuncIndexWrapper(_RemoveSingleRef, 0)
+    SetConstrainedObject = _RefFuncIndexWrapper(_SetSingleRef, 0, 'SetConstrainedObject')
+    GetConstrainedObject = _RefFuncIndexWrapper(_GetSingleRef, 0, 'GetConstrainedObject')
+    RemoveConstrainedObject = _RefFuncIndexWrapper(_RemoveSingleRef, 0, 'RemoveConstrainedObject')
     
     # Origin reference
-    SetOriginObject = _RefFuncIndexWrapper(_SetSingleRef, 1)
-    GetOriginObject = _RefFuncIndexWrapper(_GetSingleRef, 1)
-    RemoveOriginObject = _RefFuncIndexWrapper(_RemoveSingleRef, 1)
+    SetOriginObject = _RefFuncIndexWrapper(_SetSingleRef, 1, 'SetOriginObject', 'Set the origin object')
+    GetOriginObject = _RefFuncIndexWrapper(_GetSingleRef, 1, 'GetOriginObject', 'Get the origin object')
+    RemoveOriginObject = _RefFuncIndexWrapper(_RemoveSingleRef, 1, 'RemoveOriginObject', 'Remove the origin object')
     
     # Target reference
-    SetTargetObject = _RefFuncIndexWrapper(_SetSingleRef, 2)
-    GetTargetObject = _RefFuncIndexWrapper(_GetSingleRef, 2)
-    RemoveTargetObject = _RefFuncIndexWrapper(_RemoveSingleRef, 2)
+    SetTargetObject = _RefFuncIndexWrapper(_SetSingleRef, 2, 'SetTargetObject', 'Set the target object')
+    GetTargetObject = _RefFuncIndexWrapper(_GetSingleRef, 2, 'GetTargetObject', 'Get the target object')
+    RemoveTargetObject = _RefFuncIndexWrapper(_RemoveSingleRef, 2, 'RemoveTargetObject', 'Remove the target object')
 
     # Up reference
-    SetUpObject = _RefFuncIndexWrapper(_SetSingleRef, 3)
-    GetUpObject = _RefFuncIndexWrapper(_GetSingleRef, 3)
-    RemoveUpObject = _RefFuncIndexWrapper(_RemoveSingleRef, 3)
+    SetUpObject = _RefFuncIndexWrapper(_SetSingleRef, 3, 'SetUpObject', 'Set the up object')
+    GetUpObject = _RefFuncIndexWrapper(_GetSingleRef, 3, 'GetUpObject', 'Get the up object')
+    RemoveUpObject = _RefFuncIndexWrapper(_RemoveSingleRef, 3, 'RemoveUpObject', 'Remove the up object')
 
 class PMBRigidBodyConstraint(ConstrainedSourceMixIn, PMBConstraint):
     '''Rigid Body constraint class'''
@@ -558,43 +559,43 @@ class PMBMappingConstraint(PMBConstraint, FBConstraint):
     constraintType = 'Mapping'
     
     # Constrained reference
-    SetConstrainedObject = _RefFuncIndexWrapper(_SetSingleRef, 0)
-    GetConstrainedObject = _RefFuncIndexWrapper(_GetSingleRef, 0)
-    RemoveConstrainedObject = _RefFuncIndexWrapper(_RemoveSingleRef, 0)
+    SetConstrainedObject = _RefFuncIndexWrapper(_SetSingleRef, 0, 'SetConstrainedObject')
+    GetConstrainedObject = _RefFuncIndexWrapper(_GetSingleRef, 0, 'GetConstrainedObject')
+    RemoveConstrainedObject = _RefFuncIndexWrapper(_RemoveSingleRef, 0, 'RemoveConstrainedObject')
     
     # Reference reference
-    SetReferenceObject = _RefFuncIndexWrapper(_SetSingleRef, 1)
-    GetReferenceObject = _RefFuncIndexWrapper(_GetSingleRef, 1)
-    RemoveReferenceObject = _RefFuncIndexWrapper(_RemoveSingleRef, 1)
+    SetReferenceObject = _RefFuncIndexWrapper(_SetSingleRef, 1, 'SetReferenceObject', 'Set the reference object')
+    GetReferenceObject = _RefFuncIndexWrapper(_GetSingleRef, 1, 'GetReferenceObject', 'Get the reference object')
+    RemoveReferenceObject = _RefFuncIndexWrapper(_RemoveSingleRef, 1, 'RemoveReferenceObject', 'Remove the reference object')
             
     # Source reference
-    SetSourceObject = _RefFuncIndexWrapper(_SetSingleRef, 2)
-    GetSourceObject = _RefFuncIndexWrapper(_GetSingleRef, 2)
-    RemoveSourceObject = _RefFuncIndexWrapper(_RemoveSingleRef, 2)
+    SetSourceObject = _RefFuncIndexWrapper(_SetSingleRef, 2, 'SetSourceObject', 'Set the source object')
+    GetSourceObject = _RefFuncIndexWrapper(_GetSingleRef, 2, 'GetSourceObject' , 'Get the source object')
+    RemoveSourceObject = _RefFuncIndexWrapper(_RemoveSingleRef, 2, 'RemoveSourceObject' , 'Remove the source object')
     
     # Source reference reference
-    SetSourceReferenceObject = _RefFuncIndexWrapper(_SetSingleRef, 3)
-    GetSourceReferenceObject = _RefFuncIndexWrapper(_GetSingleRef, 3)
-    RemoveSourceReferenceObject = _RefFuncIndexWrapper(_RemoveSingleRef, 3)
+    SetSourceReferenceObject = _RefFuncIndexWrapper(_SetSingleRef, 3, 'SetSourceReferenceObject', 'Set the source reference object')
+    GetSourceReferenceObject = _RefFuncIndexWrapper(_GetSingleRef, 3, 'GetSourceReferenceObject', 'Get the source reference object')
+    RemoveSourceReferenceObject = _RefFuncIndexWrapper(_RemoveSingleRef, 3, 'RemoveSourceReferenceObject', 'Remove the source reference object')
     
 class PMBRangeConstraint(PMBConstraint):
     '''Range constraint class'''
     constraintType = 'Range'
     
     # Constrained reference
-    SetConstrainedObject = _RefFuncIndexWrapper(_SetSingleRef, 0)
-    GetConstrainedObject = _RefFuncIndexWrapper(_GetSingleRef, 0)
-    RemoveConstrainedObject = _RefFuncIndexWrapper(_RemoveSingleRef, 0)
+    SetConstrainedObject = _RefFuncIndexWrapper(_SetSingleRef, 0, 'SetConstrainedObject')
+    GetConstrainedObject = _RefFuncIndexWrapper(_GetSingleRef, 0, 'GetConstrainedObject')
+    RemoveConstrainedObject = _RefFuncIndexWrapper(_RemoveSingleRef, 0, 'RemoveConstrainedObject')
     
-    # Source reference
-    SetSourceObject = _RefFuncIndexWrapper(_SetSingleRef, 1)
-    GetSourceObject = _RefFuncIndexWrapper(_GetSingleRef, 1)
-    RemoveSourceObject = _RefFuncIndexWrapper(_RemoveSingleRef, 1)
+    # Source reference    
+    SetSourceObject = _RefFuncIndexWrapper(_SetSingleRef, 1, 'SetSourceObject', 'Set the source object')
+    GetSourceObject = _RefFuncIndexWrapper(_GetSingleRef, 1, 'GetSourceObject' , 'Get the source object')
+    RemoveSourceObject = _RefFuncIndexWrapper(_RemoveSingleRef, 1, 'RemoveSourceObject' , 'Remove the source object')
     
     # Pulling reference
-    AddPullingObject = _RefFuncIndexWrapper(_AddMultiRef, 2)
-    GetPullingObject = _RefFuncIndexWrapper(_GetMultiRef, 2)
-    RemovePullingObject = _RefFuncIndexWrapper(_RemoveMultiRef, 2)
+    AddPullingObject = _RefFuncIndexWrapper(_AddMultiRef, 2, 'AddPullingObject', 'Add pulling object(s)')
+    GetPullingObject = _RefFuncIndexWrapper(_GetMultiRef, 2, 'GetPullingObject', 'Get list of pulling objects')
+    RemovePullingObject = _RefFuncIndexWrapper(_RemoveMultiRef, 2, 'RemovePullingObject', 'Remove pulling object(s)')
     
 class PMBChainIKConstraint(PMBConstraint, FBConstraint):
     '''Chain IK constraint class'''
@@ -604,29 +605,29 @@ class PMBChainIKConstraint(PMBConstraint, FBConstraint):
     kEvalTSAnim = dict(Never = 0, Auto = 1, Always = 2)
     
     # First joint reference
-    SetFirstJoint = _RefFuncIndexWrapper(_SetSingleRef, 0)
-    GetFirstJoint = _RefFuncIndexWrapper(_GetSingleRef, 0)
-    RemoveFirstJoint = _RefFuncIndexWrapper(_RemoveSingleRef, 0)
+    SetFirstJoint = _RefFuncIndexWrapper(_SetSingleRef, 0, 'SetFirstJoint')
+    GetFirstJoint = _RefFuncIndexWrapper(_GetSingleRef, 0, 'GetFirstJoint')
+    RemoveFirstJoint = _RefFuncIndexWrapper(_RemoveSingleRef, 0, 'RemoveFirstJoint')
     
     # End joint reference
-    SetEndJoint = _RefFuncIndexWrapper(_SetSingleRef, 1)
-    GetEndJoint = _RefFuncIndexWrapper(_GetSingleRef, 1)
-    RemoveEndJoint = _RefFuncIndexWrapper(_RemoveSingleRef, 1)
+    SetEndJoint = _RefFuncIndexWrapper(_SetSingleRef, 1, 'SetEndJoint')
+    GetEndJoint = _RefFuncIndexWrapper(_GetSingleRef, 1, 'GetEndJoint')
+    RemoveEndJoint = _RefFuncIndexWrapper(_RemoveSingleRef, 1, 'RemoveEndJoint')
     
     # Effector reference
-    SetEffector = _RefFuncIndexWrapper(_SetSingleRef, 2)
-    GetEffector = _RefFuncIndexWrapper(_GetSingleRef, 2)
-    RemoveEffector = _RefFuncIndexWrapper(_RemoveSingleRef, 2)
+    SetEffector = _RefFuncIndexWrapper(_SetSingleRef, 2, 'SetEffector')
+    GetEffector = _RefFuncIndexWrapper(_GetSingleRef, 2, 'GetEffector')
+    RemoveEffector = _RefFuncIndexWrapper(_RemoveSingleRef, 2, 'RemoveEffector')
     
     # Floor reference
-    SetFloor = _RefFuncIndexWrapper(_SetSingleRef, 3)
-    GetFloor = _RefFuncIndexWrapper(_GetSingleRef, 3)
-    RemoveFloor = _RefFuncIndexWrapper(_RemoveSingleRef, 3)
+    SetFloor = _RefFuncIndexWrapper(_SetSingleRef, 3, 'SetFloor')
+    GetFloor = _RefFuncIndexWrapper(_GetSingleRef, 3, 'GetFloor')
+    RemoveFloor = _RefFuncIndexWrapper(_RemoveSingleRef, 3, 'RemoveFloor')
     
     # Pulling reference
-    AddPoleVectorObject = _RefFuncIndexWrapper(_AddMultiRef, 4)
-    GetPoleVectorObject = _RefFuncIndexWrapper(_GetMultiRef, 4)
-    RemovePoleVectorObject = _RefFuncIndexWrapper(_RemoveMultiRef, 4)
+    AddPoleVectorObject = _RefFuncIndexWrapper(_AddMultiRef, 4, 'AddPullVectorObject')
+    GetPoleVectorObject = _RefFuncIndexWrapper(_GetMultiRef, 4, 'GetPoleVectorObject')
+    RemovePoleVectorObject = _RefFuncIndexWrapper(_RemoveMultiRef, 4, 'RemovePoleVectorObject')
        
     def GetSolverType(self):
         '''Get the solver type'''
@@ -701,9 +702,9 @@ class PMBPathConstraint(PMBConstraint):
     kAxes = {'X':0, '-X':1, 'Y':2, '-Y':3, 'Z':4, '-Z':5}
     
     # Constrained reference
-    SetConstrainedObject = _RefFuncIndexWrapper(_SetSingleRef, 0)
-    GetConstrainedObject = _RefFuncIndexWrapper(_GetSingleRef, 0)
-    RemoveConstrainedObject = _RefFuncIndexWrapper(_RemoveSingleRef, 0)
+    SetConstrainedObject = _RefFuncIndexWrapper(_SetSingleRef, 0, 'SetConstrainedObject')
+    GetConstrainedObject = _RefFuncIndexWrapper(_GetSingleRef, 0, 'GetConstrainedObject')
+    RemoveConstrainedObject = _RefFuncIndexWrapper(_RemoveSingleRef, 0, 'RemoveConstrainedObject')
     
     # Source reference
     def SetPathSource(self, model):
@@ -834,14 +835,14 @@ class PMBMultiReferentialConstraint(PMBConstraint):
     constraintType = 'Multi Referential'
     
     # Rigid reference
-    AddRigidObject = _RefFuncIndexWrapper(_AddMultiRef, 0)
-    GetRigidObject = _RefFuncIndexWrapper(_GetMultiRef, 0)
-    RemoveRigidObject = _RefFuncIndexWrapper(_RemoveMultiRef, 0)
+    AddRigidObject = _RefFuncIndexWrapper(_AddMultiRef, 0, 'AddRigidObject')
+    GetRigidObject = _RefFuncIndexWrapper(_GetMultiRef, 0, 'GetRigidObject')
+    RemoveRigidObject = _RefFuncIndexWrapper(_RemoveMultiRef, 0, 'RemoveRigidObject')
     
     # Rigid reference
-    AddParentObject = _RefFuncIndexWrapper(_AddMultiRef, 1)
-    GetParentObject = _RefFuncIndexWrapper(_GetMultiRef, 1)
-    RemoveParentObject = _RefFuncIndexWrapper(_RemoveMultiRef, 1)
+    AddParentObject = _RefFuncIndexWrapper(_AddMultiRef, 1, 'AddParentObject')
+    GetParentObject = _RefFuncIndexWrapper(_GetMultiRef, 1, 'GetParentObject')
+    RemoveParentObject = _RefFuncIndexWrapper(_RemoveMultiRef, 1, 'RemoveParentObject')
     
 ########## TO DO ######################################################
     def SetActiveReference(self, model):
@@ -884,16 +885,16 @@ class PMBConstraintRelation(PMBConstraint):
     constraintType = 'Relation'
     
     def GetBoxByName(self, name):
-        '''Find a box in the constraint with a specific name'''
-        for box in self.component.Boxes:
-            if box.Name == name:
-                return box
-    
-    def GetSenders(self):
-        pass
-    
-    def GetReceivers(self):
-        pass
+        '''
+        Find a box with a specific name (Name at the top of function box).
+        Uses component name if the box is an object in the scene otherwise
+        it will use the box name
+        '''
+        for relBox in self.component.Boxes:
+            # get the true box to get the name
+            box = getattr(relBox, 'Box', relBox)
+            if box.LongName == name:
+                return relBox
 
 # Assign the classes to the description of each constraint
 kConstraintClassDict = {"Aim" : PMBAimConstraint,
