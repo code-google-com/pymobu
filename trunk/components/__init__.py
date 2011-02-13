@@ -26,6 +26,7 @@ from pyfbsdk import FBPropertyType
 from pyfbsdk import FBMatrix
 from pyfbsdk import FBVector3d
 from pyfbsdk import FBModelTransformationMatrix
+from pyfbsdk import FBNamespaceAction
 
 def ConvertToPyMoBu(component):
     '''Utility to convert a FB class to a PMB class'''
@@ -77,7 +78,7 @@ class PMBComponent(object):
 
     def __repr__(self):
         name  = getattr(self.component, 'LongName', self.component.Name)
-        return "%s('%s')" % (self.__class__.__name__, name)
+        return "<%s('%s')>" % (self.__class__.__name__, name)
     
     def __str__(self):
         '''Returns the full object name'''
@@ -118,7 +119,8 @@ class PMBComponent(object):
             if '*' in pattern:
                 pattern = pattern.replace('*', '.*')
                 # name testing function
-                passesNameTest = lambda x: re.match(pattern, x.GetName())
+                matchExp = re.compile(pattern)
+                passesNameTest = lambda x: matchExp.match(x.GetName())
             else:
                 passesNameTest = lambda x: pattern == x.GetName()      
         else:

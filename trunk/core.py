@@ -111,7 +111,8 @@ def ls(pattern=None, type=None, selected=None, visible=None, includeNamespace=Tr
         if '*' in pattern:
             pattern = pattern.replace('*', '.*')
             # name testing function
-            passesNameTest = lambda x: re.match(pattern, getName(x))
+            nameMatch = re.compile(pattern)
+            passesNameTest = lambda x: nameMatch.match(getName(x))
         else:
             passesNameTest = lambda x: pattern == getName(x)       
     else:
