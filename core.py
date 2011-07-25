@@ -169,16 +169,15 @@ def ls(pattern=None, type=None, selected=None, visible=None, includeNamespace=Tr
 
 def progressBarIterator(func, items):
     '''Function that displays a progress while looping a list of items through the function'''
-    # can't figure out why it doesn't work
     # may convert this to a generator
     progressBar = FBProgress()
     progressBar.Caption = str(func.__name__)
     ret = []
-    num = len(items)
+    num = float(len(items))
     try:
         for i, item in enumerate(items):
             progressBar.Text = str(item)
-            progressBar.Percent = int(i/num)
+            progressBar.Percent = int(i/num * 100)
             ret.append(func(item))
     finally:
         progressBar.FBDelete()
